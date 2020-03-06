@@ -5,21 +5,13 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake/")
 find_package(Threads)
 
 set(TEST_SOURCE_FILES
+    check_main.c
     )
-add_executable(test_libixcom ${TEST_SOURCE_FILES})
 
-# Used to generate absolute paths in the unit tests
-set(RELATIVE_PATH_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}")
-
-target_include_directories(test_libixcom PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
-target_link_libraries(test_libixcom PRIVATE ixcom ${CHECK_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
-target_code_coverage(test_libixcom AUTO ALL)
+swift_add_test(test_libixcom
+        POST_BUILD
+        SRCS ${TEST_SOURCE_FILES}
+        LINK ixcom check Threads::Threads
+        )
 
 target_compile_options(test_libixcom PRIVATE "-std=gnu99")
-
-add_custom_command(
-    TARGET test_libixcom POST_BUILD
-    COMMENT "Running unit tests"
-    COMMAND test_libixcom
-    )
-

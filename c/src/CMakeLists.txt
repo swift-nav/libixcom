@@ -1,12 +1,15 @@
 cmake_minimum_required(VERSION 2.8.7)
 
 set(libixcom_HEADERS
+  ${PROJECT_SOURCE_DIR}/include/ixcom/messages.h
+  ${PROJECT_SOURCE_DIR}/include/ixcom/XCOMdat.h
   )
 
 add_library(ixcom
+  decode.c
   )
 
-target_link_libraries(ixcom m)
+target_link_libraries(ixcom m swiftnav)
 target_include_directories(ixcom PUBLIC ${PROJECT_SOURCE_DIR}/include)
 
 target_compile_options(ixcom PRIVATE "-Wall")
