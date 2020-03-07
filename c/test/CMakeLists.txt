@@ -6,6 +6,7 @@ find_package(Threads)
 
 set(TEST_SOURCE_FILES
     check_main.c
+    check_ixcom.c
     )
 
 swift_add_test(test_libixcom

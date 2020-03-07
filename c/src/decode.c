@@ -14,7 +14,8 @@
 
 #include <ixcom/decode.h>
 
-/* iXCOM is a little-endian protocol. This library assumes the host system is also little-endian.
+/* iXCOM is a little-endian protocol. This library assumes the host system is
+ * also little-endian.
  * TODO(yizhe) make decoders endian-agnostic
  */
 
@@ -82,31 +83,71 @@ uint16_t ixcom_checksum(const uint8_t buff[], size_t length) {
   return crc;
 }
 
-ixcom_rc ixcom_read_header(const uint8_t buff[], XCOMHeader *header) {
+ixcom_rc ixcom_decode_header(const uint8_t buff[], XCOMHeader *header) {
   assert(header);
 
   size_t bit_offset = 0;
-  header->sync = (uint8_t) getbitu(buff, bit_offset, 8);
+  header->sync = (uint8_t)getbitu(buff, bit_offset, 8);
   bit_offset += 8;
 
   if (header->sync != XCOM_SYNC_BYTE) {
     return RC_INVALID_MESSAGE;
   }
 
-  header->msg_id = (uint8_t) getbitu(buff, bit_offset, 8);
+  header->msg_id = (uint8_t)getbitu(buff, bit_offset, 8);
   bit_offset += 8;
-  header->frame_counter = (uint8_t) getbitu(buff, bit_offset, 8);
+  header->frame_counter = (uint8_t)getbitu(buff, bit_offset, 8);
   bit_offset += 8;
-  header->trigger_source = (uint8_t) getbitu(buff, bit_offset, 8);
+  header->trigger_source = (uint8_t)getbitu(buff, bit_offset, 8);
   bit_offset += 8;
-  header->msg_len = (uint16_t) getbitu(buff, bit_offset, 16);
+  header->msg_len = (uint16_t)getbitu(buff, bit_offset, 16);
   bit_offset += 16;
-  header->gps_week = (uint16_t) getbitu(buff, bit_offset, 16);
+  header->gps_week = (uint16_t)getbitu(buff, bit_offset, 16);
   bit_offset += 16;
-  header->gps_time_sec = (uint32_t) getbitu(buff, bit_offset, 32);
+  header->gps_time_sec = (uint32_t)getbitu(buff, bit_offset, 32);
   bit_offset += 32;
-  header->gps_time_usec = (uint32_t) getbitu(buff, bit_offset, 32);
+  header->gps_time_usec = (uint32_t)getbitu(buff, bit_offset, 32);
   bit_offset += 32;
+
+  return RC_OK;
+}
+
+ixcom_rc ixcom_decode_footer(const uint8_t buff[], XCOMFooter *footer) {
+  assert(footer);
+
+  size_t bit_offset = 0;
+
+  footer->global_status.value = (uint16_t)getbitu(buff, bit_offset, 16);
+  bit_offset += 16;
+  footer->crc16 = (uint16_t)getbitu(buff, bit_offset, 16);
+  bit_offset += 16;
+
+  return RC_OK;
+}
+
+ixcom_rc ixcom_decode_imuraw(const uint8_t buff[], XCOMmsg_IMURAW *msg_imuraw) {
+  assert(msg_imuraw);
+
+  size_t bit_offset = 0;
+
+  ixcom_rc ret = ixcom_decode_header(buff, &msg_imuraw->header);
+  if (ret != RC_OK) {
+    return ret;
+  }
+  bit_offset += sizeof(msg_imuraw->header) * 8;
+
+  for (int i = 0; i < 3; i++) {
+    msg_imuraw->acc[i] = getbitu(buff, bit_offset, 32);
+    bit_offset += 32;
+  }
+
+  for (int i = 0; i < 3; i++) {
+    msg_imuraw->omg[i] = getbitu(buff, bit_offset, 32);
+    bit_offset += 32;
+  }
+
+  ixcom_decode_footer(buff + (bit_offset / 8), &msg_imuraw->footer);
+  bit_offset += sizeof(msg_imuraw->footer) * 8;
 
   return RC_OK;
 }

@@ -20,8 +20,10 @@ extern "C" {
 #include <ixcom/messages.h>
 
 uint16_t ixcom_checksum(const uint8_t buff[], size_t length);
-ixcom_rc ixcom_read_header(const uint8_t buff[], XCOMHeader *header);
+ixcom_rc ixcom_decode_header(const uint8_t buff[], XCOMHeader *header);
+ixcom_rc ixcom_decode_footer(const uint8_t buff[], XCOMFooter *footer);
 
+ixcom_rc ixcom_decode_imuraw(const uint8_t buff[], XCOMmsg_IMURAW *msg_imuraw);
 
 #ifdef __cplusplus
 }
