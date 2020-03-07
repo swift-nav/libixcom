@@ -10,21 +10,25 @@
  * WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#ifndef SWIFTNAV_IXCOM_MESSAGES_H
-#define SWIFTNAV_IXCOM_MESSAGES_H
+#include <string.h>
 
-#include <stdbool.h>
-#include <stdint.h>
+#include <ixcom/messages.h>
 
-#include <ixcom/XCOMdat.h>
+/* iXCOM protocol is little-endian */
 
-size_t ixcom_set_bytes(const uint8_t *src, uint8_t *dest, size_t num_bytes);
+bool is_little_endian() {
+  uint32_t i = 1;
+  return ((*(char *)&i) != 0);
+}
 
-/* return codes for the decoders */
-typedef enum ixcom_rc_e {
-  RC_OK = 0,
-  RC_MESSAGE_TYPE_MISMATCH = -1,
-  RC_INVALID_MESSAGE = -2
-} ixcom_rc;
+size_t ixcom_set_bytes(const uint8_t *src, uint8_t *dest, size_t num_bytes) {
+  if (is_little_endian()) {
+    memcpy(dest, src, num_bytes);
+  } else {
+    for (size_t i = 0; i < num_bytes; i++) {
+      dest[i] = src[num_bytes - i - 1];
+    }
+  }
 
-#endif /* SWIFTNAV_IXCOM_MESSAGES_H */
+  return num_bytes;
+}

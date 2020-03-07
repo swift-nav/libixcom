@@ -18,6 +18,7 @@
 #include <string.h>
 
 #include <ixcom/decode.h>
+#include <ixcom/encode.h>
 #include <ixcom/messages.h>
 
 #include "check_suites.h"
@@ -50,7 +51,36 @@ void msg_imuraw_equals(const XCOMmsg_IMURAW *msg_in,
   msg_footer_equals(&msg_in->footer, &msg_out->footer);
 }
 
-START_TEST(test_ixcom_imuraw) {}
+START_TEST(test_ixcom_imuraw) {
+  XCOMmsg_IMURAW msg;
+
+  msg.header.sync = XCOM_SYNC_BYTE;
+  msg.header.msg_id = XCOM_MSGID_IMURAW;
+  msg.header.frame_counter = 1;
+  msg.header.trigger_source = 2;
+  msg.header.msg_len = 44;
+  msg.header.gps_week = 4;
+  msg.header.gps_time_sec = 5;
+  msg.header.gps_time_usec = 6;
+
+  for (int i = 0; i < 3; i++) {
+    msg.acc[i] = 3.33 * i;
+    msg.omg[i] = -3.33 * i;
+  }
+
+  msg.footer.global_status.value = 7;
+  msg.footer.crc16 = ixcom_checksum((uint8_t *)&msg, msg.header.msg_len - 2);
+
+  uint8_t buff[1024];
+  memset(buff, 0, 1024);
+  ck_assert_uint_eq(ixcom_encode_imuraw(&msg, buff), msg.header.msg_len);
+
+  XCOMmsg_IMURAW msg_imuraw_out;
+  ixcom_rc ret = ixcom_decode_imuraw(buff, &msg_imuraw_out);
+  ck_assert_int_eq(RC_OK, ret);
+  msg_imuraw_equals(&msg, &msg_imuraw_out);
+}
+
 END_TEST
 
 Suite *ixcom_suite(void) {

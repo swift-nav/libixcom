@@ -10,21 +10,22 @@
  * WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#ifndef SWIFTNAV_IXCOM_MESSAGES_H
-#define SWIFTNAV_IXCOM_MESSAGES_H
+#ifndef SWIFTNAV_IXCOM_ENCODE_H
+#define SWIFTNAV_IXCOM_ENCODE_H
 
-#include <stdbool.h>
-#include <stdint.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include <ixcom/XCOMdat.h>
+#include <ixcom/messages.h>
 
-size_t ixcom_set_bytes(const uint8_t *src, uint8_t *dest, size_t num_bytes);
+size_t ixcom_encode_header(XCOMHeader *header, uint8_t buff[]);
+size_t ixcom_encode_footer(XCOMFooter *footer, uint8_t buff[]);
 
-/* return codes for the decoders */
-typedef enum ixcom_rc_e {
-  RC_OK = 0,
-  RC_MESSAGE_TYPE_MISMATCH = -1,
-  RC_INVALID_MESSAGE = -2
-} ixcom_rc;
+size_t ixcom_encode_imuraw(XCOMmsg_IMURAW *msg_imuraw, uint8_t buff[]);
 
-#endif /* SWIFTNAV_IXCOM_MESSAGES_H */
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* SWIFTNAV_IXCOM_ENCODE_H */

@@ -86,28 +86,28 @@ uint16_t ixcom_checksum(const uint8_t buff[], size_t length) {
 ixcom_rc ixcom_decode_header(const uint8_t buff[], XCOMHeader *header) {
   assert(header);
 
-  size_t bit_offset = 0;
-  header->sync = (uint8_t)getbitu(buff, bit_offset, 8);
-  bit_offset += 8;
+  size_t byte_offset = 0;
+  byte_offset +=
+      ixcom_set_bytes(buff + byte_offset, (uint8_t *)(&header->sync), 1);
 
   if (header->sync != XCOM_SYNC_BYTE) {
     return RC_INVALID_MESSAGE;
   }
 
-  header->msg_id = (uint8_t)getbitu(buff, bit_offset, 8);
-  bit_offset += 8;
-  header->frame_counter = (uint8_t)getbitu(buff, bit_offset, 8);
-  bit_offset += 8;
-  header->trigger_source = (uint8_t)getbitu(buff, bit_offset, 8);
-  bit_offset += 8;
-  header->msg_len = (uint16_t)getbitu(buff, bit_offset, 16);
-  bit_offset += 16;
-  header->gps_week = (uint16_t)getbitu(buff, bit_offset, 16);
-  bit_offset += 16;
-  header->gps_time_sec = (uint32_t)getbitu(buff, bit_offset, 32);
-  bit_offset += 32;
-  header->gps_time_usec = (uint32_t)getbitu(buff, bit_offset, 32);
-  bit_offset += 32;
+  byte_offset +=
+      ixcom_set_bytes(buff + byte_offset, (uint8_t *)(&header->msg_id), 1);
+  byte_offset += ixcom_set_bytes(buff + byte_offset,
+                                 (uint8_t *)(&header->frame_counter), 1);
+  byte_offset += ixcom_set_bytes(buff + byte_offset,
+                                 (uint8_t *)(&header->trigger_source), 1);
+  byte_offset +=
+      ixcom_set_bytes(buff + byte_offset, (uint8_t *)(&header->msg_len), 2);
+  byte_offset +=
+      ixcom_set_bytes(buff + byte_offset, (uint8_t *)(&header->gps_week), 2);
+  byte_offset += ixcom_set_bytes(buff + byte_offset,
+                                 (uint8_t *)(&header->gps_time_sec), 4);
+  byte_offset += ixcom_set_bytes(buff + byte_offset,
+                                 (uint8_t *)(&header->gps_time_usec), 4);
 
   return RC_OK;
 }
@@ -115,12 +115,12 @@ ixcom_rc ixcom_decode_header(const uint8_t buff[], XCOMHeader *header) {
 ixcom_rc ixcom_decode_footer(const uint8_t buff[], XCOMFooter *footer) {
   assert(footer);
 
-  size_t bit_offset = 0;
+  size_t byte_offset = 0;
 
-  footer->global_status.value = (uint16_t)getbitu(buff, bit_offset, 16);
-  bit_offset += 16;
-  footer->crc16 = (uint16_t)getbitu(buff, bit_offset, 16);
-  bit_offset += 16;
+  byte_offset += ixcom_set_bytes(buff + byte_offset,
+                                 (uint8_t *)(&footer->global_status.value), 2);
+  byte_offset +=
+      ixcom_set_bytes(buff + byte_offset, (uint8_t *)(&footer->crc16), 2);
 
   return RC_OK;
 }
@@ -128,26 +128,30 @@ ixcom_rc ixcom_decode_footer(const uint8_t buff[], XCOMFooter *footer) {
 ixcom_rc ixcom_decode_imuraw(const uint8_t buff[], XCOMmsg_IMURAW *msg_imuraw) {
   assert(msg_imuraw);
 
-  size_t bit_offset = 0;
+  size_t byte_offset = 0;
 
   ixcom_rc ret = ixcom_decode_header(buff, &msg_imuraw->header);
   if (ret != RC_OK) {
     return ret;
   }
-  bit_offset += sizeof(msg_imuraw->header) * 8;
+  byte_offset += sizeof(msg_imuraw->header);
 
-  for (int i = 0; i < 3; i++) {
-    msg_imuraw->acc[i] = getbitu(buff, bit_offset, 32);
-    bit_offset += 32;
+  if (msg_imuraw->header.msg_id != XCOM_MSGID_IMURAW) {
+    return RC_INVALID_MESSAGE;
   }
 
   for (int i = 0; i < 3; i++) {
-    msg_imuraw->omg[i] = getbitu(buff, bit_offset, 32);
-    bit_offset += 32;
+    byte_offset += ixcom_set_bytes(buff + byte_offset,
+                                   (uint8_t *)(&msg_imuraw->acc[i]), 4);
   }
 
-  ixcom_decode_footer(buff + (bit_offset / 8), &msg_imuraw->footer);
-  bit_offset += sizeof(msg_imuraw->footer) * 8;
+  for (int i = 0; i < 3; i++) {
+    byte_offset += ixcom_set_bytes(buff + byte_offset,
+                                   (uint8_t *)(&msg_imuraw->omg[i]), 4);
+  }
+
+  ixcom_decode_footer(buff + byte_offset, &msg_imuraw->footer);
+  byte_offset += sizeof(msg_imuraw->footer);
 
   return RC_OK;
 }
