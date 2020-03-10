@@ -74,3 +74,21 @@ size_t ixcom_encode_imuraw(XCOMmsg_IMURAW *msg_imuraw, uint8_t buff[]) {
 
   return byte_offset;
 }
+
+size_t ixcom_encode_wheeldata(XCOMmsg_WHEELDATA *msg_wheeldata,
+                              uint8_t buff[]) {
+  assert(msg_wheeldata);
+
+  size_t byte_offset = 0;
+  byte_offset +=
+      ixcom_encode_header(&msg_wheeldata->header, buff + byte_offset);
+  byte_offset += ixcom_set_bytes((uint8_t *)(&msg_wheeldata->speed),
+                                 buff + byte_offset, 4);
+  byte_offset += ixcom_set_bytes((uint8_t *)(&msg_wheeldata->ticks),
+                                 buff + byte_offset, 4);
+
+  byte_offset +=
+      ixcom_encode_footer(&msg_wheeldata->footer, buff + byte_offset);
+
+  return byte_offset;
+}

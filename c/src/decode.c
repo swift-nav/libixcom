@@ -155,3 +155,30 @@ ixcom_rc ixcom_decode_imuraw(const uint8_t buff[], XCOMmsg_IMURAW *msg_imuraw) {
 
   return RC_OK;
 }
+
+ixcom_rc ixcom_decode_wheeldata(const uint8_t buff[],
+                                XCOMmsg_WHEELDATA *msg_wheeldata) {
+  assert(msg_wheeldata);
+
+  size_t byte_offset = 0;
+
+  ixcom_rc ret = ixcom_decode_header(buff, &msg_wheeldata->header);
+  if (ret != RC_OK) {
+    return ret;
+  }
+  byte_offset += sizeof(msg_wheeldata->header);
+
+  if (msg_wheeldata->header.msg_id != XCOM_MSGID_WHEELDATA) {
+    return RC_INVALID_MESSAGE;
+  }
+
+  byte_offset += ixcom_set_bytes(buff + byte_offset,
+                                 (uint8_t *)(&msg_wheeldata->speed), 4);
+  byte_offset += ixcom_set_bytes(buff + byte_offset,
+                                 (uint8_t *)(&msg_wheeldata->ticks), 4);
+
+  ixcom_decode_footer(buff + byte_offset, &msg_wheeldata->footer);
+  byte_offset += sizeof(msg_wheeldata->footer);
+
+  return RC_OK;
+}

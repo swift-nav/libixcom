@@ -23,6 +23,7 @@ size_t ixcom_encode_header(XCOMHeader *header, uint8_t buff[]);
 size_t ixcom_encode_footer(XCOMFooter *footer, uint8_t buff[]);
 
 size_t ixcom_encode_imuraw(XCOMmsg_IMURAW *msg_imuraw, uint8_t buff[]);
+size_t ixcom_encode_wheeldata(XCOMmsg_WHEELDATA *msg_wheeldata, uint8_t buff[]);
 
 #ifdef __cplusplus
 }

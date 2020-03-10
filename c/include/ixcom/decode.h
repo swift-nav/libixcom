@@ -24,6 +24,8 @@ ixcom_rc ixcom_decode_header(const uint8_t buff[], XCOMHeader *header);
 ixcom_rc ixcom_decode_footer(const uint8_t buff[], XCOMFooter *footer);
 
 ixcom_rc ixcom_decode_imuraw(const uint8_t buff[], XCOMmsg_IMURAW *msg_imuraw);
+ixcom_rc ixcom_decode_wheeldata(const uint8_t buff[],
+                                XCOMmsg_WHEELDATA *msg_wheeldata);
 
 #ifdef __cplusplus
 }

@@ -51,6 +51,14 @@ void msg_imuraw_equals(const XCOMmsg_IMURAW *msg_in,
   msg_footer_equals(&msg_in->footer, &msg_out->footer);
 }
 
+void msg_wheeldata_equals(const XCOMmsg_WHEELDATA *msg_in,
+                          const XCOMmsg_WHEELDATA *msg_out) {
+  msg_header_equals(&msg_in->header, &msg_out->header);
+  ck_assert(fabs(msg_in->speed - msg_out->speed) < FLOAT_EPS);
+  ck_assert_uint_eq(msg_in->ticks, msg_out->ticks);
+  msg_footer_equals(&msg_in->footer, &msg_out->footer);
+}
+
 START_TEST(test_ixcom_imuraw) {
   XCOMmsg_IMURAW msg;
 
@@ -80,7 +88,35 @@ START_TEST(test_ixcom_imuraw) {
   ck_assert_int_eq(RC_OK, ret);
   msg_imuraw_equals(&msg, &msg_imuraw_out);
 }
+END_TEST
 
+START_TEST(test_ixcom_wheeldata) {
+  XCOMmsg_WHEELDATA msg;
+
+  msg.header.sync = XCOM_SYNC_BYTE;
+  msg.header.msg_id = XCOM_MSGID_WHEELDATA;
+  msg.header.frame_counter = 1;
+  msg.header.trigger_source = 2;
+  msg.header.msg_len = 28;
+  msg.header.gps_week = 4;
+  msg.header.gps_time_sec = 5;
+  msg.header.gps_time_usec = 6;
+
+  msg.speed = 3.33;
+  msg.ticks = -1234;
+
+  msg.footer.global_status.value = 7;
+  msg.footer.crc16 = ixcom_checksum((uint8_t *)&msg, msg.header.msg_len - 2);
+
+  uint8_t buff[1024];
+  memset(buff, 0, 1024);
+  ck_assert_uint_eq(ixcom_encode_wheeldata(&msg, buff), msg.header.msg_len);
+
+  XCOMmsg_WHEELDATA msg_wheeldata_out;
+  ixcom_rc ret = ixcom_decode_wheeldata(buff, &msg_wheeldata_out);
+  ck_assert_int_eq(RC_OK, ret);
+  msg_wheeldata_equals(&msg, &msg_wheeldata_out);
+}
 END_TEST
 
 Suite *ixcom_suite(void) {
@@ -88,6 +124,7 @@ Suite *ixcom_suite(void) {
 
   TCase *tc_ixcom = tcase_create("ixcom");
   tcase_add_test(tc_ixcom, test_ixcom_imuraw);
+  tcase_add_test(tc_ixcom, test_ixcom_wheeldata);
   suite_add_tcase(s, tc_ixcom);
 
   return s;
