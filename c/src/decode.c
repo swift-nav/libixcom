@@ -153,6 +153,11 @@ ixcom_rc ixcom_decode_imuraw(const uint8_t buff[], XCOMmsg_IMURAW *msg_imuraw) {
   ixcom_decode_footer(buff + byte_offset, &msg_imuraw->footer);
   byte_offset += sizeof(msg_imuraw->footer);
 
+  uint16_t checksum = ixcom_checksum(buff, msg_imuraw->header.msg_len - 2);
+  if (checksum != msg_imuraw->footer.crc16) {
+    return RC_INVALID_MESSAGE;
+  }
+
   return RC_OK;
 }
 
@@ -179,6 +184,11 @@ ixcom_rc ixcom_decode_wheeldata(const uint8_t buff[],
 
   ixcom_decode_footer(buff + byte_offset, &msg_wheeldata->footer);
   byte_offset += sizeof(msg_wheeldata->footer);
+
+  uint16_t checksum = ixcom_checksum(buff, msg_wheeldata->header.msg_len - 2);
+  if (checksum != msg_wheeldata->footer.crc16) {
+    return RC_INVALID_MESSAGE;
+  }
 
   return RC_OK;
 }
