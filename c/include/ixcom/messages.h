@@ -22,9 +22,9 @@ size_t ixcom_set_bytes(const uint8_t *src, uint8_t *dest, size_t num_bytes);
 
 /* return codes for the decoders */
 typedef enum ixcom_rc_e {
-  RC_OK = 0,
-  RC_MESSAGE_TYPE_MISMATCH = -1,
-  RC_INVALID_MESSAGE = -2
+  IXCOM_RC_OK = 0,
+  IXCOM_RC_MESSAGE_TYPE_MISMATCH = -1,
+  IXCOM_RC_INVALID_MESSAGE = -2
 } ixcom_rc;
 
 #endif /* SWIFTNAV_IXCOM_MESSAGES_H */

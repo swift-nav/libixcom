@@ -91,7 +91,7 @@ ixcom_rc ixcom_decode_header(const uint8_t buff[], XCOMHeader *header) {
       ixcom_set_bytes(buff + byte_offset, (uint8_t *)(&header->sync), 1);
 
   if (header->sync != XCOM_SYNC_BYTE) {
-    return RC_INVALID_MESSAGE;
+    return IXCOM_RC_INVALID_MESSAGE;
   }
 
   byte_offset +=
@@ -109,7 +109,7 @@ ixcom_rc ixcom_decode_header(const uint8_t buff[], XCOMHeader *header) {
   byte_offset += ixcom_set_bytes(buff + byte_offset,
                                  (uint8_t *)(&header->gps_time_usec), 4);
 
-  return RC_OK;
+  return IXCOM_RC_OK;
 }
 
 ixcom_rc ixcom_decode_footer(const uint8_t buff[], XCOMFooter *footer) {
@@ -122,7 +122,7 @@ ixcom_rc ixcom_decode_footer(const uint8_t buff[], XCOMFooter *footer) {
   byte_offset +=
       ixcom_set_bytes(buff + byte_offset, (uint8_t *)(&footer->crc16), 2);
 
-  return RC_OK;
+  return IXCOM_RC_OK;
 }
 
 ixcom_rc ixcom_decode_imuraw(const uint8_t buff[], XCOMmsg_IMURAW *msg_imuraw) {
@@ -131,13 +131,13 @@ ixcom_rc ixcom_decode_imuraw(const uint8_t buff[], XCOMmsg_IMURAW *msg_imuraw) {
   size_t byte_offset = 0;
 
   ixcom_rc ret = ixcom_decode_header(buff, &msg_imuraw->header);
-  if (ret != RC_OK) {
+  if (ret != IXCOM_RC_OK) {
     return ret;
   }
   byte_offset += sizeof(msg_imuraw->header);
 
   if (msg_imuraw->header.msg_id != XCOM_MSGID_IMURAW) {
-    return RC_INVALID_MESSAGE;
+    return IXCOM_RC_INVALID_MESSAGE;
   }
 
   for (int i = 0; i < 3; i++) {
@@ -155,10 +155,10 @@ ixcom_rc ixcom_decode_imuraw(const uint8_t buff[], XCOMmsg_IMURAW *msg_imuraw) {
 
   uint16_t checksum = ixcom_checksum(buff, msg_imuraw->header.msg_len - 2);
   if (checksum != msg_imuraw->footer.crc16) {
-    return RC_INVALID_MESSAGE;
+    return IXCOM_RC_INVALID_MESSAGE;
   }
 
-  return RC_OK;
+  return IXCOM_RC_OK;
 }
 
 ixcom_rc ixcom_decode_wheeldata(const uint8_t buff[],
@@ -168,13 +168,13 @@ ixcom_rc ixcom_decode_wheeldata(const uint8_t buff[],
   size_t byte_offset = 0;
 
   ixcom_rc ret = ixcom_decode_header(buff, &msg_wheeldata->header);
-  if (ret != RC_OK) {
+  if (ret != IXCOM_RC_OK) {
     return ret;
   }
   byte_offset += sizeof(msg_wheeldata->header);
 
   if (msg_wheeldata->header.msg_id != XCOM_MSGID_WHEELDATA) {
-    return RC_INVALID_MESSAGE;
+    return IXCOM_RC_INVALID_MESSAGE;
   }
 
   byte_offset += ixcom_set_bytes(buff + byte_offset,
@@ -187,8 +187,8 @@ ixcom_rc ixcom_decode_wheeldata(const uint8_t buff[],
 
   uint16_t checksum = ixcom_checksum(buff, msg_wheeldata->header.msg_len - 2);
   if (checksum != msg_wheeldata->footer.crc16) {
-    return RC_INVALID_MESSAGE;
+    return IXCOM_RC_INVALID_MESSAGE;
   }
 
-  return RC_OK;
+  return IXCOM_RC_OK;
 }

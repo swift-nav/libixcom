@@ -85,7 +85,7 @@ START_TEST(test_ixcom_imuraw) {
 
   XCOMmsg_IMURAW msg_imuraw_out;
   ixcom_rc ret = ixcom_decode_imuraw(buff, &msg_imuraw_out);
-  ck_assert_int_eq(RC_OK, ret);
+  ck_assert_int_eq(IXCOM_RC_OK, ret);
   msg_imuraw_equals(&msg, &msg_imuraw_out);
 }
 END_TEST
@@ -114,7 +114,7 @@ START_TEST(test_ixcom_wheeldata) {
 
   XCOMmsg_WHEELDATA msg_wheeldata_out;
   ixcom_rc ret = ixcom_decode_wheeldata(buff, &msg_wheeldata_out);
-  ck_assert_int_eq(RC_OK, ret);
+  ck_assert_int_eq(IXCOM_RC_OK, ret);
   msg_wheeldata_equals(&msg, &msg_wheeldata_out);
 }
 END_TEST
