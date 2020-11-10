@@ -16,7 +16,7 @@ add_library(ixcom
 target_link_libraries(ixcom m swiftnav)
 target_include_directories(ixcom PUBLIC ${PROJECT_SOURCE_DIR}/include)
 swift_set_language_standards(ixcom)
-swift_set_compile_options(ixcom)
+swift_set_compile_options(ixcom ADD -pedantic)
 
 
 install(TARGETS ixcom DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR})

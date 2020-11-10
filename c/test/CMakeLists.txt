@@ -10,6 +10,7 @@ set(TEST_SOURCE_FILES
     )
 
 swift_add_test(test_libixcom
+        UNIT_TEST
         POST_BUILD
         SRCS ${TEST_SOURCE_FILES}
         LINK ixcom check Threads::Threads
