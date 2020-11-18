@@ -14,5 +14,5 @@ swift_add_test(test_libixcom
         SRCS ${TEST_SOURCE_FILES}
         LINK ixcom check Threads::Threads
         )
-
-target_compile_options(test_libixcom PRIVATE "-std=gnu99")
+swift_set_language_standards(test_libixcom)
+swift_set_compile_options(test_libixcom)

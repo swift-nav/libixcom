@@ -24,14 +24,11 @@ size_t ixcom_encode_header(XCOMHeader *header, uint8_t buff[]) {
   assert(header);
 
   size_t byte_offset = 0;
+  byte_offset += ixcom_set_bytes(&header->sync, buff + byte_offset, 1);
+  byte_offset += ixcom_set_bytes(&header->msg_id, buff + byte_offset, 1);
+  byte_offset += ixcom_set_bytes(&header->frame_counter, buff + byte_offset, 1);
   byte_offset +=
-      ixcom_set_bytes((uint8_t *)&header->sync, buff + byte_offset, 1);
-  byte_offset +=
-      ixcom_set_bytes((uint8_t *)&header->msg_id, buff + byte_offset, 1);
-  byte_offset +=
-      ixcom_set_bytes((uint8_t *)&header->frame_counter, buff + byte_offset, 1);
-  byte_offset += ixcom_set_bytes((uint8_t *)&header->trigger_source,
-                                 buff + byte_offset, 1);
+      ixcom_set_bytes(&header->trigger_source, buff + byte_offset, 1);
   byte_offset +=
       ixcom_set_bytes((uint8_t *)&header->msg_len, buff + byte_offset, 2);
   byte_offset +=
@@ -48,10 +45,12 @@ size_t ixcom_encode_footer(XCOMFooter *footer, uint8_t buff[]) {
   assert(footer);
 
   size_t byte_offset = 0;
-  byte_offset += ixcom_set_bytes((uint8_t *)&footer->global_status.value,
-                                 buff + byte_offset, 2);
+  // clang-format off
+  byte_offset += ixcom_set_bytes(
+      (uint8_t *)&footer->global_status.value, buff + byte_offset, 2);
   byte_offset +=
       ixcom_set_bytes((uint8_t *)&footer->crc16, buff + byte_offset, 2);
+  // clang-format on
   return byte_offset;
 }
 
@@ -61,13 +60,17 @@ size_t ixcom_encode_imuraw(XCOMmsg_IMURAW *msg_imuraw, uint8_t buff[]) {
   size_t byte_offset = 0;
   byte_offset += ixcom_encode_header(&msg_imuraw->header, buff + byte_offset);
   for (int i = 0; i < 3; i++) {
-    byte_offset += ixcom_set_bytes((uint8_t *)(&msg_imuraw->acc[i]),
-                                   buff + byte_offset, 4);
+    // clang-format off
+    byte_offset += ixcom_set_bytes(
+        (uint8_t *)(&msg_imuraw->acc[i]), buff + byte_offset, 4);
+    // clang-format on
   }
 
   for (int i = 0; i < 3; i++) {
-    byte_offset += ixcom_set_bytes((uint8_t *)(&msg_imuraw->omg[i]),
-                                   buff + byte_offset, 4);
+    // clang-format off
+    byte_offset += ixcom_set_bytes(
+        (uint8_t *)(&msg_imuraw->omg[i]), buff + byte_offset, 4);
+    // clang-format on
   }
 
   byte_offset += ixcom_encode_footer(&msg_imuraw->footer, buff + byte_offset);
@@ -82,10 +85,12 @@ size_t ixcom_encode_wheeldata(XCOMmsg_WHEELDATA *msg_wheeldata,
   size_t byte_offset = 0;
   byte_offset +=
       ixcom_encode_header(&msg_wheeldata->header, buff + byte_offset);
-  byte_offset += ixcom_set_bytes((uint8_t *)(&msg_wheeldata->speed),
-                                 buff + byte_offset, 4);
-  byte_offset += ixcom_set_bytes((uint8_t *)(&msg_wheeldata->ticks),
-                                 buff + byte_offset, 4);
+  // clang-format off
+  byte_offset += ixcom_set_bytes(
+      (uint8_t *)(&msg_wheeldata->speed), buff + byte_offset, 4);
+  byte_offset += ixcom_set_bytes(
+      (uint8_t *)(&msg_wheeldata->ticks), buff + byte_offset, 4);
+  // clang-format on
 
   byte_offset +=
       ixcom_encode_footer(&msg_wheeldata->footer, buff + byte_offset);
