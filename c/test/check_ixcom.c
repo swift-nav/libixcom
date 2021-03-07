@@ -55,7 +55,7 @@ void msg_wheeldata_equals(const XCOMmsg_WHEELDATA *msg_in,
                           const XCOMmsg_WHEELDATA *msg_out) {
   msg_header_equals(&msg_in->header, &msg_out->header);
   ck_assert(fabs(msg_in->speed - msg_out->speed) < FLOAT_EPS);
-  ck_assert_uint_eq(msg_in->ticks, msg_out->ticks);
+  ck_assert_uint_eq((uintmax_t)msg_in->ticks, (uintmax_t)msg_out->ticks);
   msg_footer_equals(&msg_in->footer, &msg_out->footer);
 }
 
@@ -72,12 +72,12 @@ START_TEST(test_ixcom_imuraw) {
   msg.header.gps_time_usec = 6;
 
   for (int i = 0; i < 3; i++) {
-    msg.acc[i] = 3.33 * i;
-    msg.omg[i] = -3.33 * i;
+    msg.acc[i] = 3.33f * (float)i;
+    msg.omg[i] = -3.33f * (float)i;
   }
 
   msg.footer.global_status.value = 7;
-  msg.footer.crc16 = ixcom_checksum((uint8_t *)&msg, msg.header.msg_len - 2);
+  msg.footer.crc16 = ixcom_checksum((uint8_t *)&msg, msg.header.msg_len - 2u);
 
   uint8_t buff[1024];
   memset(buff, 0, 1024);
@@ -102,11 +102,11 @@ START_TEST(test_ixcom_wheeldata) {
   msg.header.gps_time_sec = 5;
   msg.header.gps_time_usec = 6;
 
-  msg.speed = 3.33;
+  msg.speed = 3.33f;
   msg.ticks = -1234;
 
   msg.footer.global_status.value = 7;
-  msg.footer.crc16 = ixcom_checksum((uint8_t *)&msg, msg.header.msg_len - 2);
+  msg.footer.crc16 = ixcom_checksum((uint8_t *)&msg, msg.header.msg_len - 2u);
 
   uint8_t buff[1024];
   memset(buff, 0, 1024);

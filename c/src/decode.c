@@ -64,7 +64,7 @@ static const uint16_t crc_table[256] = {
  * \return The new crc
  */
 uint16_t crc_byte(const uint16_t crc, const uint16_t byte) {
-  return (crc << 8) ^ crc_table[(crc >> 8) ^ byte];
+  return (uint16_t)((crc << 8) ^ crc_table[(crc >> 8) ^ byte]);
 }
 
 /** Computes the crc16 checksum across a message. The checksum is calculated
@@ -87,27 +87,27 @@ ixcom_rc ixcom_decode_header(const uint8_t buff[], XCOMHeader *header) {
   assert(header);
 
   size_t byte_offset = 0;
-  byte_offset +=
-      ixcom_set_bytes(buff + byte_offset, (uint8_t *)(&header->sync), 1);
+  byte_offset += ixcom_set_bytes(buff + byte_offset, &header->sync, 1);
 
   if (header->sync != XCOM_SYNC_BYTE) {
     return IXCOM_RC_INVALID_MESSAGE;
   }
 
+  byte_offset += ixcom_set_bytes(buff + byte_offset, &header->msg_id, 1);
+  byte_offset += ixcom_set_bytes(buff + byte_offset, &header->frame_counter, 1);
   byte_offset +=
-      ixcom_set_bytes(buff + byte_offset, (uint8_t *)(&header->msg_id), 1);
-  byte_offset += ixcom_set_bytes(buff + byte_offset,
-                                 (uint8_t *)(&header->frame_counter), 1);
-  byte_offset += ixcom_set_bytes(buff + byte_offset,
-                                 (uint8_t *)(&header->trigger_source), 1);
+      ixcom_set_bytes(buff + byte_offset, &header->trigger_source, 1);
   byte_offset +=
       ixcom_set_bytes(buff + byte_offset, (uint8_t *)(&header->msg_len), 2);
   byte_offset +=
       ixcom_set_bytes(buff + byte_offset, (uint8_t *)(&header->gps_week), 2);
-  byte_offset += ixcom_set_bytes(buff + byte_offset,
-                                 (uint8_t *)(&header->gps_time_sec), 4);
-  byte_offset += ixcom_set_bytes(buff + byte_offset,
-                                 (uint8_t *)(&header->gps_time_usec), 4);
+  // clang-format off
+  byte_offset += ixcom_set_bytes(
+      buff + byte_offset, (uint8_t *)(&header->gps_time_sec), 4);
+  // NOLINTNEXTLINE
+  byte_offset += ixcom_set_bytes(
+      buff + byte_offset, (uint8_t *)(&header->gps_time_usec), 4);
+  // clang-format on
 
   return IXCOM_RC_OK;
 }
@@ -117,8 +117,11 @@ ixcom_rc ixcom_decode_footer(const uint8_t buff[], XCOMFooter *footer) {
 
   size_t byte_offset = 0;
 
-  byte_offset += ixcom_set_bytes(buff + byte_offset,
-                                 (uint8_t *)(&footer->global_status.value), 2);
+  // clang-format off
+  byte_offset += ixcom_set_bytes(
+      buff + byte_offset, (uint8_t *)(&footer->global_status.value), 2);
+  // clang-format on
+  // NOLINTNEXTLINE
   byte_offset +=
       ixcom_set_bytes(buff + byte_offset, (uint8_t *)(&footer->crc16), 2);
 
@@ -141,19 +144,24 @@ ixcom_rc ixcom_decode_imuraw(const uint8_t buff[], XCOMmsg_IMURAW *msg_imuraw) {
   }
 
   for (int i = 0; i < 3; i++) {
-    byte_offset += ixcom_set_bytes(buff + byte_offset,
-                                   (uint8_t *)(&msg_imuraw->acc[i]), 4);
+    // clang-format off
+    byte_offset += ixcom_set_bytes(
+        buff + byte_offset, (uint8_t *)(&msg_imuraw->acc[i]), 4);
+    // clang-format on
   }
 
   for (int i = 0; i < 3; i++) {
-    byte_offset += ixcom_set_bytes(buff + byte_offset,
-                                   (uint8_t *)(&msg_imuraw->omg[i]), 4);
+    // clang-format off
+    byte_offset += ixcom_set_bytes(
+        buff + byte_offset, (uint8_t *)(&msg_imuraw->omg[i]), 4);
+    // clang-format on
   }
 
   ixcom_decode_footer(buff + byte_offset, &msg_imuraw->footer);
+  // NOLINTNEXTLINE
   byte_offset += sizeof(msg_imuraw->footer);
 
-  uint16_t checksum = ixcom_checksum(buff, msg_imuraw->header.msg_len - 2);
+  uint16_t checksum = ixcom_checksum(buff, msg_imuraw->header.msg_len - 2u);
   if (checksum != msg_imuraw->footer.crc16) {
     return IXCOM_RC_INVALID_MESSAGE;
   }
@@ -177,15 +185,18 @@ ixcom_rc ixcom_decode_wheeldata(const uint8_t buff[],
     return IXCOM_RC_INVALID_MESSAGE;
   }
 
-  byte_offset += ixcom_set_bytes(buff + byte_offset,
-                                 (uint8_t *)(&msg_wheeldata->speed), 4);
-  byte_offset += ixcom_set_bytes(buff + byte_offset,
-                                 (uint8_t *)(&msg_wheeldata->ticks), 4);
+  // clang-format off
+  byte_offset += ixcom_set_bytes(
+      buff + byte_offset, (uint8_t *)(&msg_wheeldata->speed), 4);
+  byte_offset += ixcom_set_bytes(
+      buff + byte_offset, (uint8_t *)(&msg_wheeldata->ticks), 4);
+  // clang-format on
 
   ixcom_decode_footer(buff + byte_offset, &msg_wheeldata->footer);
+  // NOLINTNEXTLINE
   byte_offset += sizeof(msg_wheeldata->footer);
 
-  uint16_t checksum = ixcom_checksum(buff, msg_wheeldata->header.msg_len - 2);
+  uint16_t checksum = ixcom_checksum(buff, msg_wheeldata->header.msg_len - 2u);
   if (checksum != msg_wheeldata->footer.crc16) {
     return IXCOM_RC_INVALID_MESSAGE;
   }
