@@ -14,6 +14,7 @@
 #define SWIFTNAV_IXCOM_MESSAGES_H
 
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 
 #include <ixcom/XCOMdat.h>

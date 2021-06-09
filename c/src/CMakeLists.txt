@@ -7,17 +7,16 @@ set(libixcom_HEADERS
   ${PROJECT_SOURCE_DIR}/include/ixcom/encode.h
   )
 
-add_library(ixcom
-  decode.c
-  encode.c
-  messages.c
-  )
+swift_add_library(ixcom
+  SOURCES
+    decode.c
+    encode.c
+    messages.c
+)
+add_library(swiftnav::ixcom ALIAS ixcom)
 
-target_link_libraries(ixcom m swiftnav)
+target_link_libraries(ixcom PUBLIC swiftnav)
 target_include_directories(ixcom PUBLIC ${PROJECT_SOURCE_DIR}/include)
-swift_set_language_standards(ixcom)
-swift_set_compile_options(ixcom ADD -pedantic)
-
 
 install(TARGETS ixcom DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR})
 install(FILES ${libixcom_HEADERS} DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR}/ixcom)

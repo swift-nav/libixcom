@@ -9,6 +9,8 @@
 
 #include <stdint.h>
 
+#include <swiftnav/macros.h>
+
 /*
  * General
  */
@@ -21,7 +23,7 @@ enum XComMessageID {
   XCOM_MSGID_WHEELDATA = 0x16, /**< (Single-) Odometer measurements */
 };
 
-typedef struct __attribute__((__packed__)) {
+typedef struct SWIFT_ATTR_PACKED {
   uint8_t sync;          /**< Synchronization character (is always set to 0x7E;
                             XCOM_SYNC_BYTE) */
   uint8_t msg_id;        /**< iXCOM message ID. iXCOM distinguishes between four
@@ -136,7 +138,7 @@ enum XCOMGlobalStatusPosMode {
   PosUndefined = 3 /**< The position accuracy is undefined */
 };
 
-typedef struct __attribute__((__packed__)) {
+typedef struct SWIFT_ATTR_PACKED {
   union { /**< The global status is a summarized status word that contains a
              combination of several status bits. This status word should be used
              to evaluate the data integrity and is attached as part of the
@@ -149,7 +151,7 @@ typedef struct __attribute__((__packed__)) {
                      synchronization byte. */
 } XCOMFooter;
 
-typedef struct __attribute__((__packed__)) {
+typedef struct SWIFT_ATTR_PACKED {
   XCOMHeader header;
   float acc[3]; /**< Calibrated acceleration along IMU x-, y- and z-axis in
                    [m/s2] */
@@ -158,7 +160,7 @@ typedef struct __attribute__((__packed__)) {
   XCOMFooter footer;
 } XCOMmsg_IMURAW;
 
-typedef struct __attribute__((__packed__)) {
+typedef struct SWIFT_ATTR_PACKED {
   XCOMHeader header;
   float speed;
   int32_t ticks;
